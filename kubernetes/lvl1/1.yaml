@@ -1,4 +1,20 @@
-alias clear='printf "\033[2J\033[H"'
+# Deploy Pods in Kubernetes Cluster
+k run pod-nginx --image=nginx:latest -o yaml --dry-run=client > pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata: 
+ name: pod-ngnix
+ app: nginx_app
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+
+# Deploy Applications with Kubernetes Deployments
+# Setup Kubernetes Namespaces and PODs
+
+# Set Resource Limits in Kubernetes Pods
 
 k apply -f- <<EOF
 apiVersion: v1
@@ -25,3 +41,9 @@ status: {}
 EOF
 
 k describe po httpd-pod | grep -A 5 -i Limits:
+
+# Execute Rolling Updates in Kubernetes
+k describe deployments.apps/nginx-deployment
+k set image deployments.apps nginx-deployment nginx-container=nginx:1.17
+k get po
+k describe deployments.apps/nginx-deployment | grep -i image

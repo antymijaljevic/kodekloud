@@ -13,4 +13,13 @@ sudo useradd -e 2024-02-17 john
 sudo passwd john
 sudo chage -l john
 
+## Day 3: Secure Root SSH Access
+### https://askubuntu.com/questions/27559/how-do-i-disable-remote-ssh-login-as-root-from-a-server
+sudo vi /etc/ssh/sshd_config
+PermitRootLogin no
 
+sudo systemctl list-unit-files | grep -i ssh
+sudo systemctl is-enabled sshd.service
+sudo systemctl restart sshd.service
+sudo systemctl status sshd.service
+ssh root@stapp01
