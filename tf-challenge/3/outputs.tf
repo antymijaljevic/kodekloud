@@ -4,5 +4,5 @@
 # }
 
 output "public_ip" {
-  value = aws_eip.citadel
+  value = aws_eip.eip
 }
