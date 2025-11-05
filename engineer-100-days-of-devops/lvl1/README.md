@@ -23,3 +23,15 @@ sudo systemctl is-enabled sshd.service
 sudo systemctl restart sshd.service
 sudo systemctl status sshd.service
 ssh root@stapp01
+
+## Day 4: Script Execution Permissions
+### https://chmod-calculator.com/
+<!-- 7 (owner): read(4) + write(2) + execute(1) = 7
+5 (group): read(4) + execute(1) = 5
+5 (other): read(4) + execute(1) = 5
+a+rx = add read and execute for all -->
+
+ssh steve@stapp02
+sudo chmod 755 /tmp/xfusioncorp.sh
+chmod a+rx /tmp/xfusioncorp.sh
+ls -l 

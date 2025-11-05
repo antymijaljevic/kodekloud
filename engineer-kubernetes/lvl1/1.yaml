@@ -47,3 +47,9 @@ k describe deployments.apps/nginx-deployment
 k set image deployments.apps nginx-deployment nginx-container=nginx:1.17
 k get po
 k describe deployments.apps/nginx-deployment | grep -i image
+
+# Revert Deployment to Previous Version in Kubernetes
+k describe deployments.apps/nginx-deployment | grep -i revision
+k rollout history deployment/nginx-deployment
+k rollout history deployment/nginx-deployment --revision=1
+k rollout undo deployment/nginx-deployment
