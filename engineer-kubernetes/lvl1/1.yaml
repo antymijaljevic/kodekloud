@@ -53,3 +53,30 @@ k describe deployments.apps/nginx-deployment | grep -i revision
 k rollout history deployment/nginx-deployment
 k rollout history deployment/nginx-deployment --revision=1
 k rollout undo deployment/nginx-deployment
+
+# Deploy ReplicaSet in Kubernetes Cluster
+### https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-replicaset
+  labels:
+    app: nginx_app
+    type: front-end
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx_app
+      type: front-end
+  template:
+    metadata:
+      labels:
+        app: nginx_app
+        type: front-end
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:latest
+
+k get all

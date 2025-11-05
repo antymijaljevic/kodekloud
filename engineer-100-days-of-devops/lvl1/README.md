@@ -35,3 +35,14 @@ ssh steve@stapp02
 sudo chmod 755 /tmp/xfusioncorp.sh
 chmod a+rx /tmp/xfusioncorp.sh
 ls -l 
+
+## Day 5: SElinux Installation and Configuration
+ssh tony@stapp01
+cat /etc/*release
+sudo yum update
+
+sudo yum install policycoreutils.x86_64 selinux-policy selinux-policy-targeted libselinux-utils setroubleshoot-server setools setools-console mcstrans
+
+getenforce
+vi /etc/sysconfig/selinux
+SELINUX=disabled
