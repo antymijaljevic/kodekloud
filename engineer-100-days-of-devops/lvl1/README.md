@@ -46,3 +46,14 @@ sudo yum install policycoreutils.x86_64 selinux-policy selinux-policy-targeted l
 getenforce
 vi /etc/sysconfig/selinux
 SELINUX=disabled
+
+## Day 6: Create a Cron Job
+ssh tony@stapp01
+ssh steve@tapp02
+ssh banner@tapp03
+sudo yum install cronie -y
+systemctl list-units
+systemctl status crond
+sudo crontab -u root -e
+*/5 * * * * echo hello > /tmp/cron_text
+sudo crontab -u root -l

@@ -80,3 +80,32 @@ spec:
         image: nginx:latest
 
 k get all
+
+# Schedule Cronjobs in Kubernetes
+k create cronjob devops --image=httpd:latest --schedule="*/8 * * * *" \
+  --command="/bin/sh", "-c", "echo" Welcome to xfusioncorp!"] \
+  -o yaml --dry-run=client > cronjob.yaml
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  creationTimestamp: null
+  name: devops
+spec:
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+      name: devops
+    spec:
+      template:
+        metadata:
+          creationTimestamp: null
+        spec:
+          containers:
+          - image: httpd:latest
+            name: cron-devops
+            command: ["sh", "-c", "echo", "Welcome to xfusioncorp!"]
+            resources: {}
+          restartPolicy: OnFailure
+  schedule: '*/8 * * * *' # The job then repeats this 8-minute loop for every hour of every day.
+status: {}
