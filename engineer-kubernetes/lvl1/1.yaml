@@ -83,7 +83,6 @@ k get all
 
 # Schedule Cronjobs in Kubernetes
 k create cronjob devops --image=httpd:latest --schedule="*/8 * * * *" \
-  --command="/bin/sh", "-c", "echo" Welcome to xfusioncorp!"] \
   -o yaml --dry-run=client > cronjob.yaml
 
 apiVersion: batch/v1
@@ -109,3 +108,30 @@ spec:
           restartPolicy: OnFailure
   schedule: '*/8 * * * *' # The job then repeats this 8-minute loop for every hour of every day.
 status: {}
+
+# Create Countdown Job in Kubernetes
+k create job countdown-datacenter --image=ubuntu:latest -o yaml --dry-run=client > job.yaml
+vi job.yaml
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  creationTimestamp: null
+  name: countdown-devops
+spec:
+  template:
+    metadata:
+      name: countdown-devops
+      creationTimestamp: null
+    spec:
+      containers:
+      - image: fedora:latest
+        name: container-countdown-devops
+        command: ["sleep"]
+        args: ["5"]
+        resources: {}
+      restartPolicy: Never
+status: {}
+
+k create -f job.yaml
+k get job

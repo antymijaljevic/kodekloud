@@ -1,7 +1,8 @@
 ## https://kubernetes.io/docs/concepts/configuration/organize-cluster-access-kubeconfig/
 ## https://kubernetes.io/docs/tasks/tls/certificate-issue-client-csr/
 ## https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-### manual
+
+### remove if needed
 vi $HOME/.kube/config
 cat /root/martin.crt | base64 | tr -d "\n"
 cat /root/martin.key | base64 | tr -d "\n"
@@ -39,7 +40,7 @@ k get csr
 k certificate approve martin
 
 ### add creds and context. Set default context
-k config set-credentials martin --client-certificate=/root/martin.crt --client-key=/root/martin.key
+k config set-credentials martin --client-certificate=/root/martin.crt --client-key=/root/martin.key --embed-certs=false
 k config set-context developer --cluster=kubernetes --user=martin
 k config view
 
@@ -48,11 +49,36 @@ k create role developer-role --verb=* --resource=svc,pvc,po -n development
 k -n development get roles developer-role -o yaml
 k create rolebinding developer-rolebinding --role="developer-role" -n development --user="martin"
 k -n development get rolebindings developer-rolebinding -o yaml
+k auth can-i get svc --user=martin -n development
+k auth can-i get po --user=martin -n development
+k auth can-i get pvc --user=martin -n development
 
 
 # create svc with user martin
 k config use-context developer
 k create svc nodeport jekyll-node-service -n development --tcp=4000:4000 -o yaml --dry-run=client > svc.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  namespace: development
+  labels:
+    app: jekyll-node-service
+  name: jekyll-node-service
+spec:
+  ports:
+  - name: 4000-4000
+    port: 4000
+    protocol: TCP
+    targetPort: 4000
+    nodePort: 30097
+  selector:
+    app: jekyll-node-service
+  type: NodePort
+status:
+  loadBalancer: {}
+
 k -n development get svc jekyll-node-service -o yaml
 
 # check storageClass
@@ -60,20 +86,48 @@ k config use-context kubernetes-admin@kubernetes
 k get sc local-storage -o yaml
 k config use-context developer
 
+# create pvc
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: development
+  name: jekyll-site
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 1Gi
+  storageClassName: local-storage
+
 # create pod
 apiVersion: v1
 kind: Pod
 metadata:
   name: jekyll
+  namespace: development
   labels:
-    app: jekyll
+    run: jekyll
 spec:
   containers:
   - name: jekyll
-    image: busybox:1.28
-    command: ['sh', '-c', 'cd /site && bundle install && bundle exec jekyll serve']
-    args: ['--host 0.0.0.0', '--port 4000']
+    image: gcr.io/kodekloud/customimage/jekyll-serve
+    command: ['sh', '-c', 'cd /site && bundle install && bundle exec jekyll serve --host 0.0.0.0 --port 4000']
+    volumeMounts:
+      - name: site
+        mountPath: /site
   initContainers:
   - name: copy-jekyll-site
     image: gcr.io/kodekloud/customimage/jekyll
-    command: ['sh', '-c', "rm -rf /site/* && jekyll new /site && cd /site && bundle install"]
+    command: ['sh', '-c', 'rm -rf /site/* && jekyll new /site && cd /site && bundle install']
+    volumeMounts:
+      - name: site
+        mountPath: /site
+  volumes:
+    - name: site
+      persistentVolumeClaim:
+        claimName: jekyll-site
+
+# pvc bounded to pv
+k -n development get po,pvc

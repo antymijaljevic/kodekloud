@@ -57,3 +57,14 @@ systemctl status crond
 sudo crontab -u root -e
 */5 * * * * echo hello > /tmp/cron_text
 sudo crontab -u root -l
+
+# Day 7: Linux SSH Authentication
+## https://askubuntu.com/questions/4830/easiest-way-to-copy-ssh-keys-to-another-machine/4833#4833
+ls ~/.ssh/
+ssh-keygen
+ssh-copy-id tony@stapp01
+ssh tony@stapp01
+ssh-copy-id steve@stapp02
+ssh steve@stapp02
+ssh-copy-id banner@stapp03
+ssh banner@stapp03
