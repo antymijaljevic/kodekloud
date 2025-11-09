@@ -68,3 +68,25 @@ ssh-copy-id steve@stapp02
 ssh steve@stapp02
 ssh-copy-id banner@stapp03
 ssh banner@stapp03
+
+# Day 8: Install Ansible
+## https://pypi.org/project/ansible/#history
+## https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+
+pip3 --version
+### global in /usr/local/lib/python3.x/dist-packages
+sudo pip3 install ansible==4.9.0
+ansible --version
+
+# Day 9: MariaDB Troubleshooting
+ssh peter@stdb01
+systemctl status mariadb
+sudo systemctl restart mariadb
+journalctl -xeu mariadb.service # unit, end of pager, unit
+journalctl -xeu mariadb.service | grep -i Warning
+systemctl show mariadb
+systemctl show mariadb --property=User
+cat /usr/lib/systemd/system/mariadb.service
+ls -laih /var/lib/mysql
+sudo chown mysql:mysql -R /var/lib/mysql
+sudo systemctl restart mariadb
