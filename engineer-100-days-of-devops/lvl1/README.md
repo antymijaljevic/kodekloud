@@ -90,3 +90,22 @@ cat /usr/lib/systemd/system/mariadb.service
 ls -laih /var/lib/mysql
 sudo chown mysql:mysql -R /var/lib/mysql
 sudo systemctl restart mariadb
+
+# Day 10: Linux Bash Scripts
+## https://www.hostinger.com/tutorials/linux-tar-command-with-examples?utm_campaign=Generic-Tutorials-DSA-t1|NT:Se|LO:Other-EU&utm_medium=ppc&gad_source=1&gad_campaignid=12231291749&gbraid=0AAAAADMy-hZYPlppLu26kIA3liEpdko69
+ssh tony@stapp01
+sudo yum install zip
+which bash
+
+ssh-keygen
+ssh-copy-id clint@stbkp01
+ssh clint@stbkp01
+
+vi /scripts/news_backup.sh
+
+#!/usr/bin/bash
+zip -r /backup/xfusioncorp_news.zip /var/www/html/news
+scp /backup/xfusioncorp_news.zip clint@stbkp01:/backup/xfusioncorp_news.zip
+
+chmod +x /scripts/news_backup.sh
+/scripts/news_backup.sh

@@ -177,3 +177,10 @@ status: {}
 # Resolve POD Deployemnt Issue
 k edit pod webserver
 nginx:latest
+
+# Update Deployment and Service in Kubernetes
+k get all
+k edit svc nginx-service
+k scale deployment/nginx-deployment --replicas=5
+k set image deployment.apps/nginx-deployment nginx-container=nginx:latest
+k describe deployments.apps/nginx-deployment
