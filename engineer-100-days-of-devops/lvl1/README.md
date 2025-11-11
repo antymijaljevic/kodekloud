@@ -109,3 +109,59 @@ scp /backup/xfusioncorp_news.zip clint@stbkp01:/backup/xfusioncorp_news.zip
 
 chmod +x /scripts/news_backup.sh
 /scripts/news_backup.sh
+
+# Day 11: Install and Configure Tomcat Server
+## https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-centos-7
+## https://docs.microfocus.com/UCMDBB/11.0/Content/Browser/Config_Tomcat_Default_Port.htm
+ssh steve@stapp02
+
+sudo yum update -y
+sudo yum install java-1.8.0-openjdk-devel
+java -version
+
+sudo useradd -m -U -d /opt/tomcat -s /bin/false tomcat
+cd /tmp && wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.111/bin/apache-tomcat-9.0.111.tar.gz
+sudo tar xzvf apache-tomcat-9.0.111.tar.gz -C /opt/tomcat --strip-components=1
+
+sudo chown -R tomcat:tomcat /opt/tomcat
+sudo sh -c 'chmod +x /opt/tomcat/bin/*.sh'
+readlink -f $(which java)
+sudo vi /etc/systemd/system/tomcat.service
+
+[Unit]
+Description=Apache Tomcat Web Application Container
+After=network.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+
+User=tomcat
+Group=tomcat
+
+Environment="JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.462.b08-4.el9.x86_64/"
+Environment="JAVA_OPTS=-Djava.security.egd=file:///dev/urandom -Djava.awt.headless=true"
+Environment="CATALINA_BASE=/opt/tomcat"
+Environment="CATALINA_HOME=/opt/tomcat"
+Environment="CATALINA_PID=/opt/tomcat/temp/tomcat.pid"
+Environment="CATALINA_OPTS=-Xms512M -Xmx1024M -server -XX:+UseParallelGC"
+ExecStart=/opt/tomcat/bin/startup.sh
+ExecStop=/opt/tomcat/bin/shutdown.sh
+
+[Install]
+WantedBy=multi-user.target
+
+scp /tmp/ROOT.war steve@stapp02:/tmp
+cd /tmp && sudo mv ROOT.war /opt/tomcat/webapps
+
+vi /opt/tomcat/conf/server.xml
+
+sudo mkdir -p /opt/tomcat/{temp,work,logs}
+sudo chown -R tomcat:tomcat /opt/tomcat/{temp,work,logs}
+
+sudo systemctl daemon-reload
+sudo systemctl enable tomcat
+sudo systemctl start tomcat
+sudo systemctl status tomcat
+
+curl http://stapp02:8086
