@@ -58,8 +58,8 @@ sudo crontab -u root -e
 */5 * * * * echo hello > /tmp/cron_text
 sudo crontab -u root -l
 
-# Day 7: Linux SSH Authentication
-## https://askubuntu.com/questions/4830/easiest-way-to-copy-ssh-keys-to-another-machine/4833#4833
+## Day 7: Linux SSH Authentication
+### https://askubuntu.com/questions/4830/easiest-way-to-copy-ssh-keys-to-another-machine/4833#4833
 ls ~/.ssh/
 ssh-keygen
 ssh-copy-id tony@stapp01
@@ -69,16 +69,16 @@ ssh steve@stapp02
 ssh-copy-id banner@stapp03
 ssh banner@stapp03
 
-# Day 8: Install Ansible
-## https://pypi.org/project/ansible/#history
-## https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
+## Day 8: Install Ansible
+### https://pypi.org/project/ansible/#history
+### https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html
 
 pip3 --version
 ### global in /usr/local/lib/python3.x/dist-packages
 sudo pip3 install ansible==4.9.0
 ansible --version
 
-# Day 9: MariaDB Troubleshooting
+## Day 9: MariaDB Troubleshooting
 ssh peter@stdb01
 systemctl status mariadb
 sudo systemctl restart mariadb
@@ -91,8 +91,8 @@ ls -laih /var/lib/mysql
 sudo chown mysql:mysql -R /var/lib/mysql
 sudo systemctl restart mariadb
 
-# Day 10: Linux Bash Scripts
-## https://www.hostinger.com/tutorials/linux-tar-command-with-examples?utm_campaign=Generic-Tutorials-DSA-t1|NT:Se|LO:Other-EU&utm_medium=ppc&gad_source=1&gad_campaignid=12231291749&gbraid=0AAAAADMy-hZYPlppLu26kIA3liEpdko69
+## Day 10: Linux Bash Scripts
+### https://www.hostinger.com/tutorials/linux-tar-command-with-examples?utm_campaign=Generic-Tutorials-DSA-t1|NT:Se|LO:Other-EU&utm_medium=ppc&gad_source=1&gad_campaignid=12231291749&gbraid=0AAAAADMy-hZYPlppLu26kIA3liEpdko69
 ssh tony@stapp01
 sudo yum install zip
 which bash
@@ -110,9 +110,11 @@ scp /backup/xfusioncorp_news.zip clint@stbkp01:/backup/xfusioncorp_news.zip
 chmod +x /scripts/news_backup.sh
 /scripts/news_backup.sh
 
-# Day 11: Install and Configure Tomcat Server
-## https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-centos-7
-## https://docs.microfocus.com/UCMDBB/11.0/Content/Browser/Config_Tomcat_Default_Port.htm
+##  Day 11: Install and Configure Tomcat Server
+### https://www.digitalocean.com/community/tutorials/how-to-install-apache-tomcat-8-on-centos-7
+### https://docs.microfocus.com/UCMDBB/11.0/Content/Browser/Config_Tomcat_Default_Port.htm
+
+### Via binaries
 ssh steve@stapp02
 
 sudo yum update -y
@@ -123,6 +125,7 @@ sudo useradd -m -U -d /opt/tomcat -s /bin/false tomcat
 cd /tmp && wget https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.111/bin/apache-tomcat-9.0.111.tar.gz
 sudo tar xzvf apache-tomcat-9.0.111.tar.gz -C /opt/tomcat --strip-components=1
 
+sudo mkdir -p /opt/tomcat/{temp,work,logs}
 sudo chown -R tomcat:tomcat /opt/tomcat
 sudo sh -c 'chmod +x /opt/tomcat/bin/*.sh'
 readlink -f $(which java)
@@ -154,10 +157,7 @@ WantedBy=multi-user.target
 scp /tmp/ROOT.war steve@stapp02:/tmp
 cd /tmp && sudo mv ROOT.war /opt/tomcat/webapps
 
-vi /opt/tomcat/conf/server.xml
-
-sudo mkdir -p /opt/tomcat/{temp,work,logs}
-sudo chown -R tomcat:tomcat /opt/tomcat/{temp,work,logs}
+sudo vi /opt/tomcat/conf/server.xml
 
 sudo systemctl daemon-reload
 sudo systemctl enable tomcat
@@ -165,3 +165,35 @@ sudo systemctl start tomcat
 sudo systemctl status tomcat
 
 curl http://stapp02:8086
+
+### Via Yum
+ssh steve@stapp02
+sudo -i
+yum install -y tomcat
+systemctl status tomcat
+vi /usr/share/tomcat/conf/server.xml
+systemctl restart tomcat
+scp /tmp/ROOT.war steve@stapp02:/tmp/
+mv /tmp/ROOT.war /usr/share/tomcat/webapps/ROOT.war
+chown tomcat:tomcat /usr/share/tomcat/webapps/ROOT.war
+systemctl restart tomcat
+curl http://stapp02:3004
+
+## Day 12: Linux Network Services
+### https://www.digitalocean.com/community/tutorials/iptables-essentials-common-firewall-rules-and-commands
+ssh tony@stapp01
+systemctl status httpd
+sudo netstat -nlp | grep :3004
+ps -aux
+
+systemctl stop sendmail
+sudo kill 493
+sudo systemctl restart httpd
+
+### Firewall
+sudo iptables -L -n -v
+sudo iptables -I INPUT -p tcp --dport 5004 -j ACCEPT
+sudo service iptables save
+sudo systemctl restart iptables
+
+curl http://stapp01:3004

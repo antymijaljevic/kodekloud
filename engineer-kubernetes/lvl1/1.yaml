@@ -184,3 +184,5 @@ k edit svc nginx-service
 k scale deployment/nginx-deployment --replicas=5
 k set image deployment.apps/nginx-deployment nginx-container=nginx:latest
 k describe deployments.apps/nginx-deployment
+
+# Deploy Highly Available Pods with ReplicationControlle
