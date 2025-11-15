@@ -197,3 +197,28 @@ sudo service iptables save
 sudo systemctl restart iptables
 
 curl http://stapp01:3004
+
+## Day 13: IPtables Installation And Configuration
+### https://linuxize.com/post/how-to-install-iptables-on-centos-7/
+### https://www.haikel-fazzani.eu.org/blog/post/iptables-save-rules
+ssh tony@stapp01
+ssh steve@stapp02
+ssh banner@stapp03
+
+sudo yum install iptables-services -y
+sudo systemctl enable iptables
+sudo systemctl start iptables
+sudo systemctl status iptables
+sudo systemctl restart iptables
+
+sudo iptables -nvL INPUT --line-numbers
+sudo iptables -I INPUT 5 -p tcp --dport 5004 ! -s 172.16.238.14 -j DROP
+sudo iptables-save > /etc/sysconfig/iptables
+
+ssh loki@stlb01
+ping stapp01
+ping stapp02
+ping stapp03
+curl stapp01:5004
+curl stapp02:5004
+curl stapp03:5004

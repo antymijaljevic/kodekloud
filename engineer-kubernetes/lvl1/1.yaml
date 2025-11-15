@@ -186,3 +186,23 @@ k set image deployment.apps/nginx-deployment nginx-container=nginx:latest
 k describe deployments.apps/nginx-deployment
 
 # Deploy Highly Available Pods with ReplicationControlle
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-replicationcontroller
+spec:
+  replicas: 3
+  selector:
+    app: nginx_app
+    type: front-end
+  template:
+    metadata:
+      labels:
+        app: nginx_app
+        type: front-end
+    spec:
+      containers:
+      - name: nginx-container
+        image: nginx:latest
+
+k get rc
