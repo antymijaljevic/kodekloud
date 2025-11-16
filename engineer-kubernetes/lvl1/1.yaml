@@ -206,3 +206,11 @@ spec:
         image: nginx:latest
 
 k get rc
+
+# Resolve VolumeMounts Issue in Kubernetes
+## https://kubernetes.io/docs/concepts/storage/volumes/
+k run test --rm -i --image=curlimages/curl --restart=Never -- curl --max-time=5  nginx-service:8099
+k describe cm nginx-config
+kubectl cp /home/thor/index.php nginx-phpfpm:/var/www/html/index.php -c nginx-container
+k exec -it nginx-phpfpm -c nginx-container -- /bin/sh
+k replace -f /tmp/kubectl-edit-902218618.yaml --force
