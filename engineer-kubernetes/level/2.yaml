@@ -1,0 +1,35 @@
+# Shared Volumes
+k run volume-share-nautilus --image=fedora:latest -o yaml --dry-run=client > pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: volume-share-nautilus
+  name: volume-share-nautilus
+spec:
+  containers:
+  - image: fedora:latest
+    name: volume-container-nautilus-1
+    command: ["sh", "-c", "sleep 60m"]
+    volumeMounts:
+      - mountPath: /tmp/beta
+        name: volume-share
+  - image: fedora:latest
+    name: volume-container-nautilus-2
+    command: ["sh", "-c", "sleep 60m"]
+    volumeMounts:
+      - mountPath: /tmp/demo
+        name: volume-share
+  volumes:
+    - name: volume-share
+      emptyDir: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+k exec -it volume-share-nautilus sh
+touch /tmp/beta/beta.txt
+
+k exec -i volume-share-nautilus -c volume-container-nautilus-2 -- ls /tmp/demo

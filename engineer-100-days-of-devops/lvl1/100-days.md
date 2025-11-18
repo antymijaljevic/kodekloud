@@ -222,3 +222,45 @@ ping stapp03
 curl stapp01:5004
 curl stapp02:5004
 curl stapp03:5004
+
+## Day 14: Linux Process Troubleshooting
+curl stapp01:5004
+curl stapp02:5004
+curl stapp03:5004
+
+systemctl status httpd
+journalctl -xeu httpd
+sudo netstat -nlp | grep :8088
+kill 724
+systemctl restart httpd
+curl stapp01:8088
+
+## Day 15: Setup SSL for Nginx
+### https://nginx.org/en/docs/http/configuring_https_servers.html
+ssh steve@stapp02
+sudo yum install nginx -y
+sudo systemctl enable nginx
+
+sudo mkdir -p /etc/nginx/ssl
+sudo mv /tmp/nautilus.crt /etc/nginx/ssl/
+sudo mv /tmp/nautilus.key /etc/nginx/ssl/
+
+sudo tee /etc/nginx/conf.d/nautilus.conf << 'EOF'
+server {
+listen 443 ssl;
+server_name _;
+ssl_certificate /etc/nginx/ssl/nautilus.crt;
+ssl_certificate_key /etc/nginx/ssl/nautilus.key;
+root /usr/share/nginx/html;
+index index.html;
+}
+EOF
+
+echo 'Welcome!' | sudo tee /usr/share/nginx/html/index.html
+
+sudo nginx -t
+sudo systemctl start nginx
+
+curl -k  https://localhost
+curl -Ik https://172.16.238.11
+curl -k https://stapp02
