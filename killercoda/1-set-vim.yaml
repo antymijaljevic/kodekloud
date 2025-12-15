@@ -1,0 +1,21 @@
+vim ~/.vimrc
+
+set expandtab
+set tabstop=2
+set shiftwidth=2
+
+vim test-pod.yaml 
+k create -f test-pod.yaml 
+
+apiVersion: v1
+kind: Pod
+metadata:
+ name: nginx
+spec:
+  containers:
+  - name: nginx
+    image: nginx:latest
+    ports:
+    - containerPort: 80
+    
+k get po

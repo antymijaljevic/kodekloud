@@ -1,0 +1,28 @@
+k get nodes
+cp /etc/kubernetes/manifests/kube-apiserver.yaml ~/kube-apiserver.yaml.ori # originalß
+vim kube-apiserver.yaml
+k get pod
+
+crictl ps
+crictl ps -a | grep -i apiserver
+crictl logs 5b9dc27917d4a
+
+cat /var/log/pods/kube-system_kube-apiserver-controlplane_9a31fbe7182532487142fb3b5b2d2a75/kube-apiserver/5.log
+cat /var/log/containers/kube-apiserver-controlplane_kube-system_kube-apiserver-371261841b221cd54e7e3e6853f104f8e1e940ca05d3f
+dd2eb7201cb546f98a5.log
+
+docker ps -a
+docker logs <container-id>
+
+cat /var/log/syslog | grep -i apiserver
+cat /var/log/syslog | tail -n 20
+
+journalctl -xeu kubelet.service
+
+-x — Adds explanatory help text from the systemd catalog
+-e — Jumps to the end (most recent logs)
+-u — Filters to the specified unit (kubelet.service)
+
+cp ~/kube-apiserver.yaml.ori /etc/kubernetes/manifests/kube-apiserver.yaml
+watch crictl ps
+k get nodes
