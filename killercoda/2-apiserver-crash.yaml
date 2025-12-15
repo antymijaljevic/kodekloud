@@ -26,3 +26,9 @@ journalctl -xeu kubelet.service
 cp ~/kube-apiserver.yaml.ori /etc/kubernetes/manifests/kube-apiserver.yaml
 watch crictl ps
 k get nodes
+
+watch crictl ps -a
+k -n kube-system get pod
+
+tail -f /var/log/syslog | grep apiserver
+journalctl | grep apiserver
