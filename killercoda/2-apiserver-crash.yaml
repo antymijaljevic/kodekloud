@@ -1,5 +1,5 @@
 k get nodes
-cp /etc/kubernetes/manifests/kube-apiserver.yaml ~/kube-apiserver.yaml.ori # originalß
+cp /etc/kubernetes/manifests/kube-apiserver.yaml ~/kube-apiserver.yaml.ori # original
 vim kube-apiserver.yaml
 k get pod
 

@@ -1,0 +1,15 @@
+ps aux | grep kubelet
+systemctl status containerd
+systemctl status kubelet
+
+crictl ps -a | grep -i apiserver
+
+cat /var/log/syslog | grep kube-apiserver
+cat /var/log/pods/kube-system_kube-apiserver-controlplane_c8a4ba86bb692dbb0767a35e6fddb99d/kube-apiserver/3.log
+cat controlplane:/var/log/pods/kube-system_kube-apiserver-controlplane_33ed9565c7ff4f98614b4e43e86a7e43/kube-apiserver/2.log
+
+vim /etc/kubernetes/manifests/kube-apiserver.yaml
+k apply --dry-run=client -f kube-apiserver.yaml
+
+crictl ps
+k get nodes
