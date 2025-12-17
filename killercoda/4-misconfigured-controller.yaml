@@ -1,0 +1,11 @@
+k get po -n kube-system | grep -i controller
+crictl ps -a | grep -i controller
+
+k apply -f kube-controller-manager.yaml
+k -n kube-system logs kube-controller-manager
+cp kube-controller-manager.yaml ~/kube-controller-manager.yaml.ori
+vim kube-controller-manager.yaml
+
+k -n kube-system delete po kube-controller-manager
+systemctl restart kubelet
+

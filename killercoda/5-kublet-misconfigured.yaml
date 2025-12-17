@@ -1,0 +1,15 @@
+ssh node01
+systemctl status kubelet
+journalctl -xeu kubelet
+cat /var/log/syslog | grep kubelet
+find / | grep kubeadm
+
+cat /usr/lib/systemd/system/kubelet.service
+cat /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf
+cat /etc/kubernetes/kubelet.conf 
+cat /etc/kubernetes/bootstrap-kubelet.conf
+cat /var/lib/kubelet/config.yaml
+vim /var/lib/kubelet/kubeadm-flags.env
+
+systemctl daemon-reload
+service kubelet status
