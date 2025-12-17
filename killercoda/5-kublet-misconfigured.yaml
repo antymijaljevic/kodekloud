@@ -13,3 +13,14 @@ vim /var/lib/kubelet/kubeadm-flags.env
 
 systemctl daemon-reload
 service kubelet status
+
+
+| Priority | File / Source                                   | What it does |
+|---------:|--------------------------------------------------|--------------|
+| 1 (HIGH) | Kubelet command-line flags                      | Override everything |
+| 2        | /var/lib/kubelet/config.yaml                    | Main kubelet configuration |
+| 3        | /var/lib/kubelet/kubeadm-flags.env               | kubeadm-generated flags |
+| 4        | /etc/sysconfig/kubelet or /etc/default/kubelet  | Distro/user overrides |
+| 5        | /usr/lib/systemd/system/kubelet.service.d/10-kubeadm.conf | Wires flags together |
+| 6 (LOW)  | /etc/kubernetes/kubelet.conf                    | Auth (certs), not behavior |
+| 7 (LOW)  | /etc/kubernetes/bootstrap-kubelet.conf          | Bootstrap auth only |
