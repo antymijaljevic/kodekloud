@@ -1,0 +1,9 @@
+k config set-context --current --namespace=management
+k get deploy
+
+k logs deployments/collect-data -c nginx > /root/logs.log
+k logs deployments/collect-data -c httpd >> /root/logs.log
+
+cat /root/logs.log
+
+k edit deployments.apps/collect-data 

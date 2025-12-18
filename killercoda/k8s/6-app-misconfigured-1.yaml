@@ -1,0 +1,11 @@
+k -n application1 get deploy
+k -n application1 describe deploy api
+k events -n application1
+k -n application1 get po
+k -n application1 logs deploy/api
+k -n application1 logs api-c7d746b4c-cfvlx
+
+k -n application1 get cm
+k -n application1 describe cm configmap-category
+k -n application1 get cm configmap-category -o json
+k -n application1 edit deploy api

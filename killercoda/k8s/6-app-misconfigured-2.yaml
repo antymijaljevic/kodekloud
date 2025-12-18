@@ -1,0 +1,6 @@
+k config get-contexts
+
+k get deploy -A
+k logs deploy/management-frontend
+
+k edit deployments.apps/management-frontend
