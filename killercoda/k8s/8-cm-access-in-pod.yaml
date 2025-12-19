@@ -1,0 +1,41 @@
+k create cm trauerweide --from-literal=tree=trauerweide
+k create -f /root/cm.yaml
+k get cm
+k run pod1 --image=nginx:alpine --dry-run=client -o yaml > pod.yaml
+vim pod.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pod1
+  name: pod1
+  namespace: default
+spec:
+  containers:
+  - image: nginx:alpine
+    name: pod1
+    env:
+      - name: TREE1
+        valueFrom:
+          configMapKeyRef:
+            name: trauerweide
+            key: tree
+    volumeMounts:
+    - name: birke
+      mountPath: /etc/birke
+  volumes:
+    - name: birke
+      configMap:
+        name: birke
+
+k create -f pod.yaml
+
+k exec pod1 -it -- sh
+# env | grep -i tree
+# ls /etc/birke
+
+kubectl exec pod1 -- env | grep "TREE1=trauerweide"
+kubectl exec pod1 -- cat /etc/birke/tree
+kubectl exec pod1 -- cat /etc/birke/level
+kubectl exec pod1 -- cat /etc/birke/department
