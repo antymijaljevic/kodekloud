@@ -1,0 +1,81 @@
+k get po -A --show-labels
+k get ns -A --show-labels 
+
+k get networkpolicies np-100x -o yaml > np.yaml
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  creationTimestamp: "2025-12-22T14:21:19Z"
+  generation: 1
+  name: np-100x
+  namespace: default
+  resourceVersion: "2723"
+  uid: 004f46b9-7932-42a9-9da3-fdde3038fcaf
+spec:
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: level-1000
+      podSelector:
+        matchLabels:
+          level: 100x
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: level-1001
+      podSelector:
+        matchLabels:
+          level: 100x
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: level-1002
+      podSelector:
+        matchLabels:
+          level: 100x
+  - ports:
+    - port: 53
+      protocol: TCP
+    - port: 53
+      protocol: UDP
+  # ingress:
+  # - from:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         kubernetes.io/metadata.name: level-1000
+  #     podSelector:
+  #       matchLabels:
+  #         level: 100x
+  # - from:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         kubernetes.io/metadata.name: level-1001
+  #     podSelector:
+  #       matchLabels:
+  #         level: 100x
+  # - from:
+  #   - namespaceSelector:
+  #       matchLabels:
+  #         kubernetes.io/metadata.name: level-1002
+  #     podSelector:
+  #       matchLabels:
+  #         level: 100x
+  podSelector:
+    matchLabels:
+      level: 100x
+  policyTypes:
+  - Egress
+  # - Ingress
+
+k replace -f np.yaml
+
+# WILL WORK
+kubectl get svc,pod -A --show-labels | grep tester
+k exec tester-0 -- curl tester.level-1000.svc.cluster.local
+k exec tester-0 -- curl tester.level-1001.svc.cluster.local
+k exec tester-0 -- curl tester.level-1002.svc.cluster.local
+
+# WILL NOT WORK
+k exec tester-0 -- curl tester.other.svc.cluster.local
