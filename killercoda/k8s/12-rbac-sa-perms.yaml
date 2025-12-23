@@ -1,0 +1,44 @@
+kubectl create sa pipeline -n ns1
+kubectl create sa pipeline -n ns2
+k get sa -A | grep -i pipeline
+
+k get clusterRoles
+k get clusterrole view -o yaml
+
+k create clusterrole deployment-cluster-role --resource=deploy --verb=create,delete
+k get clusterrole deployment-cluster-role -o yaml
+
+k create clusterrolebinding pipeline-role-binding-view-1 --clusterrole=view --serviceaccount=ns1:pipeline
+k create clusterrolebinding pipeline-role-binding-deployment-1 --clusterrole=deployment-cluster-role --serviceaccount=ns1:pipeline
+
+
+k create clusterrolebinding pipeline-role-binding-view-2 --clusterrole=view --serviceaccount=ns2:pipeline
+k create clusterrolebinding pipeline-role-binding-deployment-2 --clusterrole=deployment-cluster-role --serviceaccount=ns2:pipeline
+
+
+k auth can-i delete deploy --as system:serviceaccount:ns1:pipeline
+k auth can-i delete deploy --as system:serviceaccount:ns1:pipeline
+ k auth can-i get cm --as system:serviceaccount:ns1:pipeline
+
+k auth can-i delete deploy --as system:serviceaccount:ns2:pipeline
+k auth can-i delete deploy --as system:serviceaccount:ns2:pipeline
+k auth can-i get cm --as system:serviceaccount:ns2:pipeline
+
+
+####### Another way
+
+# create SAs
+k -n ns1 create sa pipeline
+k -n ns2 create sa pipeline
+
+# use ClusterRole view
+k get clusterrole view # there is default one
+k create clusterrolebinding pipeline-view --clusterrole view --serviceaccount ns1:pipeline --serviceaccount ns2:pipeline
+
+# manage Deployments in both Namespaces
+k create clusterrole -h # examples
+k create clusterrole pipeline-deployment-manager --verb create,delete --resource deployments
+
+# instead of one ClusterRole we could also create the same Role in both Namespaces
+k -n ns1 create rolebinding pipeline-deployment-manager --clusterrole pipeline-deployment-manager --serviceaccount ns1:pipeline
+k -n ns2 create rolebinding pipeline-deployment-manager --clusterrole pipeline-deployment-manager --serviceaccount ns2:pipeline
