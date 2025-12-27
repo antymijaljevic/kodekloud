@@ -1,0 +1,32 @@
+k -n management get po -o custom-columns=NAME:.metadata.name,PRIORITY:.spec.priority,PC:.spec.priorityClassName
+k -n management delete pod sprinter
+
+k -n lion get po 4d37006c -o yaml | grep -i -A 2 resources
+k -n lion get po 4d37006c -o yaml | grep -i priority
+k run important --image=nginx:1.21.6-alpine -n lion --dry-run=client -o yaml > important.yaml
+k get pc
+
+k apply -f - <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: important
+  name: important
+  namespace: lion
+spec:
+  containers:
+  - image: nginx:1.21.6-alpine
+    name: important
+    resources:
+      requests:
+        memory: 1Gi  
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  priorityClassName: level3
+status: {}
+EOF
+
+k create -f important.yaml
+
+k -n lion get po

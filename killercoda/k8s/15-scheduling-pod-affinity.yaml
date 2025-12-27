@@ -1,0 +1,31 @@
+cat /root/hobby.yaml
+k get nodes --show-labels 
+k get po -A --show-labels -o wide
+
+vim /root/hobby.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    level: hobby
+  name: hobby-project
+spec:
+  affinity:
+    podAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: level
+              operator: In
+              values:
+              - restricted
+          topologyKey: kubernetes.io/hostname
+  containers:
+  - image: nginx:alpine
+    name: c
+
+k create -f hobby.yaml
+kubectl get pod -o wide --show-labels
