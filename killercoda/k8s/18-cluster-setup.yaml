@@ -1,0 +1,58 @@
+https://v1-34.docs.kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
+
+# SSH to nodes
+ssh controlplan
+ssh node-summer
+
+# kernel and OS version
+uname -r && cat /etc/*release*
+
+# Unique MAC address or product ID
+ip link
+or
+ifconfig -a
+
+### controlplane
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+    link/ether 8e:54:64:2d:6e:2f brd ff:ff:ff:ff:ff:ff
+
+### node-summer
+2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    link/ether 16:23:bd:d3:98:5b brd ff:ff:ff:ff:ff:ff
+
+### product ID
+sudo cat /sys/class/dmi/id/product_uuid
+
+# Kube-API port NOT opened before install
+nc 127.0.0.1 6443 -zv -w 2
+ss -lnt | grep 6443
+
+# Container Runtime Interface (CRI) - If you don't specify a runtime, kubeadm automatically tries to detect an installed container runtime by scanning through a list of known endpoints.
+crictl ps
+docker version
+
+ls -l /var/run/containerd/containerd.sock
+ls -l /var/run/crio/crio.sock
+ls -l /var/run/cri-dockerd.sock
+
+systemctl status containerd
+systemctl status docker
+systemctl status crio
+systemctl status cri-dockerd
+
+# Installing kubeadm, kubelet and kubectl
+
+### Introducing Kubernetes Community-Owned Package Repositories
+cat /etc/apt/sources.list.d/kubernetes.list
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+sudo apt-get update
+
+
+sudo apt-get install -y apt-transport-https ca-certificates curl gpg
+sudo apt-get install -y kubelet kubeadm kubectl
+sudo apt-mark hold kubelet kubeadm kubectl
+
+sudo systemctl enable --now kubelet
+
+kubeadm version
