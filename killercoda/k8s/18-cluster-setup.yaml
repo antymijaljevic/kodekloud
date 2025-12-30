@@ -1,8 +1,38 @@
+############## Creating a cluster with kubeadm ###########################
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/
 https://v1-34.docs.kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/
 
 # SSH to nodes
 ssh controlplan
 ssh node-summer
+
+# Check default route
+ip a | grep -A 2 -i enp1s0
+
+# 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+#     link/ether 0e:3e:86:a2:2e:53 brd ff:ff:ff:ff:ff:ff
+#     inet 172.30.1.2/24 brd 172.30.1.255 scope global dynamic noprefixroute enp1s0
+#        valid_lft 86312404sec preferred_lft 75523204sec
+#     inet6 fe80::af29:7440:c8bc:fb7b/64 scope link 
+
+ip route show
+### default via 172.30.1.1 dev enp1s0 proto dhcp src 172.30.1.2 metric 1002 mtu 1500
+
+cat /etc/hosts
+
+# 127.0.0.1 localhost
+# # The following lines are desirable for IPv6 capable hosts
+# ::1 ip6-localhost ip6-loopback
+# fe00::0 ip6-localnet
+# ff00::0 ip6-mcastprefix
+# ff02::1 ip6-allnodes
+# ff02::2 ip6-allrouters
+# ff02::3 ip6-allhosts
+# 127.0.0.1 ubuntu
+# 127.0.0.1 host01
+# 127.0.0.1 controlplane
+# 172.30.2.2 node01
+# 172.30.2.2 node-summer
 
 # kernel and OS version
 uname -r && cat /etc/*release*
@@ -13,12 +43,12 @@ or
 ifconfig -a
 
 ### controlplane
-2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
-    link/ether 8e:54:64:2d:6e:2f brd ff:ff:ff:ff:ff:ff
+# 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP mode DEFAULT group default qlen 1000
+#     link/ether 8e:54:64:2d:6e:2f brd ff:ff:ff:ff:ff:ff
 
 ### node-summer
-2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
-    link/ether 16:23:bd:d3:98:5b brd ff:ff:ff:ff:ff:ff
+# 2: enp1s0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+#     link/ether 16:23:bd:d3:98:5b brd ff:ff:ff:ff:ff:ff
 
 ### product ID
 sudo cat /sys/class/dmi/id/product_uuid
@@ -40,19 +70,37 @@ systemctl status docker
 systemctl status crio
 systemctl status cri-dockerd
 
-# Installing kubeadm, kubelet and kubectl
+ss -lx | grep containerd
 
-### Introducing Kubernetes Community-Owned Package Repositories
-cat /etc/apt/sources.list.d/kubernetes.list
-echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.34/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-sudo apt-get update
-
-
-sudo apt-get install -y apt-transport-https ca-certificates curl gpg
-sudo apt-get install -y kubelet kubeadm kubectl
-sudo apt-mark hold kubelet kubeadm kubectl
-
-sudo systemctl enable --now kubelet
-
+# Kubeadm & kubectl installed with the right version?
 kubeadm version
+k version
+
+
+# init
+kubeadm init -h
+
+kubeadm init --kubernetes-version=1.34.1 \
+--pod-network-cidr 192.168.0.0/16 \
+--ignore-preflight-errors=NumCPU \
+--ignore-preflight-errors=Mem
+
+# joint worker node
+kubeadm join 172.30.1.2:6443 --token 8kp8of.he17gklbbte11i3h \
+        --discovery-token-ca-cert-hash sha256:bbc57b6d1c394ddbbc39d615076e12f7ff75b121d797d35d03b58e9d2a3d3729
+
+or
+
+kubeadm token create --print-join-command
+ssh node-summer
+kubeadm join 172.30.1.2:6443 --token ...
+exit
+
+# move config file
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# check nodes and k8s version
+k get nodes
+kubectl get pod -A
