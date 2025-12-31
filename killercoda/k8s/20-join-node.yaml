@@ -1,0 +1,8 @@
+k get nodes
+cat /etc/hosts | grep -i node
+kubeadm token create --print-join-command
+
+ssh node01
+k version
+systemctl status kubelet
+kubeadm join 172.30.1.2:6443 --token xxx --discovery-token-ca-cert-hash sha256:xxx

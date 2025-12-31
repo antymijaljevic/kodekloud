@@ -86,8 +86,8 @@ kubeadm init --kubernetes-version=1.34.1 \
 --ignore-preflight-errors=Mem
 
 # joint worker node
-kubeadm join 172.30.1.2:6443 --token 8kp8of.he17gklbbte11i3h \
-        --discovery-token-ca-cert-hash sha256:bbc57b6d1c394ddbbc39d615076e12f7ff75b121d797d35d03b58e9d2a3d3729
+kubeadm join 172.30.1.2:6443 --token xxx \
+        --discovery-token-ca-cert-hash sha256:xxxxx
 
 or
 
