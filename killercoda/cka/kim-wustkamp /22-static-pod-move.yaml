@@ -1,0 +1,24 @@
+k get po -o wide -A
+
+# node01
+ssh node01
+scp /etc/kubernetes/manifests/resource-reserver.yaml root@controlplane:/tmp
+rm /etc/kubernetes/manifests/resource-reserver.yaml
+
+# controlplane
+vim /tmp/resource-reserver.yaml
+
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    project: resource-reserver-v1
+  name: resource-reserver-v1
+spec:
+  containers:
+  - image: nginx:alpine
+    name: c1
+
+mv /tmp/resource-reserver.yaml /etc/kubernetes/manifests
+k get po -o wide -A

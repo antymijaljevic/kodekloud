@@ -1,0 +1,5 @@
+https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-certs/
+
+kubeadm certs check-expiration | grep -i apiserver | head -n 1 > /root/apiserver-expiration
+kubeadm certs renew apiserver
+kubeadm certs renew scheduler.conf
