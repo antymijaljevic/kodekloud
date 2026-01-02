@@ -1,0 +1,12 @@
+k get po -A | grep -i metrics
+k top nodes
+k top pod -A
+k top no controlplane
+k top no node01
+
+k -n default top po emptydir-simple --containers 
+k -n default top po pod-hostpath
+
+k top po --sort-by=cpu
+k top po --sort-by=memory
+k -n default top po php-apache --containers --sort-by=memory
