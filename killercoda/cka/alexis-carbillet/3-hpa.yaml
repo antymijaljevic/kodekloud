@@ -1,0 +1,69 @@
+k apply -f- << EOF
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hpa-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hpa-demo
+  template:
+    metadata:
+      labels:
+        app: hpa-demo
+    spec:
+      containers:
+        - name: hpa-demo
+          image: k8s.gcr.io/hpa-example
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 500m
+            requests:
+              cpu: 200m
+EOF
+
+k apply -f- << EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: hpa-demo
+spec:
+  type: ClusterIP
+  selector:
+    app: hpa-demo
+  ports:
+    - port: 80
+      targetPort: 80
+EOF
+
+k get deploy,svc
+
+kubectl autoscale deployment hpa-demo --cpu=50% --min=1 --max=5
+kubectl get hpa
+
+k get po --watch
+
+kubectl run -i --tty load-generator --image=busybox /bin/sh
+while true; do wget -q -O- http://hpa-demo; done
+
+kubectl get hpa -w
+
+# metrics server missing
+kubectl get apiservices | grep metrics
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+args:
+  - --kubelet-insecure-tls
+  
+k -n kube-system rollout restart deployment metrics-server
+kubectl -n kube-system logs deploy/metrics-server
+kubectl top pods
+kubectl top nodes
+
+### remlove all
+kubectl delete deployment hpa-demo
+kubectl delete service hpa-demo
+kubectl delete hpa hpa-demo

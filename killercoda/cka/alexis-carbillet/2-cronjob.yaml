@@ -1,0 +1,38 @@
+k create ns training-cronjob
+vim hello-cronjob.yaml
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello-cron
+  namespace: training-cronjob
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: hello
+            image: busybox
+            command: ["echo", "Hello CKA"]
+          restartPolicy: OnFailure
+
+k apply -f hello-cron.yaml
+
+
+k get cronjobs -n training-cronjob
+kubectl get jobs -n training-cronjob
+k describe cronjob hello-cron -n training-cronjob
+k logs hello-cron-29458973-g7qc5 -n training-cronjob
+
+
+CronJob
+   ↓
+Job
+   ↓
+Pod
+   ↓
+Container
+   ↓
+Command

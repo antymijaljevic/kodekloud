@@ -1,0 +1,29 @@
+# List certs
+whoami
+hostname
+sudo ls -1 /etc/kubernetes/pki
+
+# Peek inside certs
+sudo openssl x509 -in /etc/kubernetes/pki/apiserver.crt -noout -text | egrep 'Subject:|Issuer:|DNS:|IP Address:'
+sudo openssl x509 -in /etc/kubernetes/pki/ca.crt -noout -text | egrep 'Subject:|Issuer:'
+
+# how kubectl uses it
+sudo egrep -n 'certificate-authority|client-certificate|client-key' /etc/kubernetes/admin.conf
+
+# Break and Restore the API Server TLS Key
+sudo mv /etc/kubernetes/pki/apiserver.key /etc/kubernetes/pki/apiserver.key.bak
+sudo journalctl -u kubelet -f
+
+### delete kube-api containers
+sudo sed -i '1s/^/# trigger reload\n/' /etc/kubernetes/manifests/kube-apiserver.yaml
+sudo crictl ps | awk '/kube-apiserver/{print $1}' | xargs -r sudo crictl rm -f
+
+# breaking due to certs
+sudo systemctl restart kubelet
+k get nodes
+sudo journalctl -u kubelet | egrep -i TLS
+
+# revert to fix
+sudo mv /etc/kubernetes/pki/apiserver.key.bak /etc/kubernetes/pki/apiserver.key
+kubectl get --raw='/readyz?verbose' | head
+k get nodes
