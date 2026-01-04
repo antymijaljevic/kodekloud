@@ -1,0 +1,41 @@
+https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/
+
+k config use-context kubernetes-admin@kubernetes 
+
+k -n kube-system get po
+kubectl -n kube-system get pod etcd-controlplane \
+-o jsonpath='{.spec.containers[0].command}' | jq -r '.[]'
+
+curl https://127.0.0.1:2379/health   --cacert /etc/kubernetes/pki/etcd/ca.crt   --cert /etc/kubernetes/pki/etcd/healthcheck-client.crt   --key  /etc/kubernetes/pki/etcd/healthcheck-client.key
+
+ETCDCTL_API=3 
+
+ETCD_VER=3.6.7
+curl -LO https://github.com/etcd-io/etcd/releases/download/v${ETCD_VER}/etcd-v${ETCD_VER}-linux-amd64.tar.gz
+
+tar xzf etcd-v${ETCD_VER}-linux-amd64.tar.gz
+cd etcd-v${ETCD_VER}-linux-amd64
+
+sudo cp etcdctl etcdutl etcd /usr/local/bin/
+
+/usr/local/bin/etcdutl version
+
+### listen-client-urls, trusted-ca-file, key-file
+
+etcdctl --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key \
+  snapshot save /opt/cluster_backup.db
+
+/usr/local/bin/etcdutl --data-dir /root/default.etcd snapshot restore /opt/cluster_backup.db > restore.txt 2>&1
+
+
+mv /etc/kubernetes/manifests /etc/kubernetes/manifests.bak
+
+rm -rf /var/lib/etcd
+mv /root/default.etcd /var/lib/etcd
+
+
+mv /etc/kubernetes/manifests.bak /etc/kubernetes/manifests
+
+kubectl get nodes
+kubectl get pods -A

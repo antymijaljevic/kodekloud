@@ -1,0 +1,6 @@
+k config view
+k config use-context kubernetes-admin@kubernetes
+
+k get po
+k logs log-reader-pod > podalllogs.txt
+cat podalllogs.txt

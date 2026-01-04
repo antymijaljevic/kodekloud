@@ -1,0 +1,13 @@
+# Use context
+### ~/.kube/config
+### echo $KUBECONFIG
+k config get-contexts 
+k config current-context
+k config view
+k config view --raw
+k config use-context kubernetes-admin@kubernetes
+
+# POD logs
+k get po
+k logs alpine-reader-pod > podlogs.txt
+cat podlogs.txt
