@@ -1,0 +1,44 @@
+https://v1-34.docs.kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/
+
+kubectl config use-context kubernetes-admin@kubernetes
+
+k get nodes
+K8S_VER=v1.35.0
+
+# update target version on repo
+vim /etc/apt/sources.list.d/kubernetes.list
+
+# GPG key
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.35/deb/Release.key \
+  | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+ls /etc/apt/keyrings
+sudo apt update
+
+
+sudo apt-cache madison kubeadm
+VER=1.35.0-1.1
+
+sudo apt-mark unhold kubeadm && \
+sudo apt-get update && sudo apt-get install -y kubeadm=$VER && \
+sudo apt-mark hold kubeadm && kubeadm version
+
+sudo kubeadm upgrade plan
+sudo kubeadm upgrade apply $1.35.0
+
+# do same on node01
+sudo apt-mark unhold kubelet kubectl && \
+sudo apt-get update && sudo apt-get install -y kubelet=$VER kubectl=$VER && \
+sudo apt-mark hold kubelet kubectl
+
+sudo systemctl daemon-reload
+sudo systemctl restart kubelet
+
+
+# If kubelet is breaking
+journalctl -u kubelet.service
+sudo kubeadm reset -f
+kubeadm join 172.30.1.2:6443 --token ....
+
+
+k get nodes
