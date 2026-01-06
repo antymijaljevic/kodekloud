@@ -1,0 +1,10 @@
+kubectl config use-context kubernetes-admin@kubernetes
+
+k get pod -A
+k get nodes
+
+kubectl top pods -A --sort-by=cpu --no-headers \
+| head -n 1 \
+| awk '{print $2 "," $1}' > high_cpu_pod.txt
+
+cat high_cpu_pod.txt

@@ -1,0 +1,12 @@
+kubectl config use-context kubernetes-admin@kubernetes
+
+k get svc -A
+k get svc redis-service -o yaml
+k get svc redis-service -o jsonpath='{.spec.ports[0].targetPort}'
+vim svc-filter.sh
+bash svc-filter.sh
+
+kubectl get pods -o=jsonpath='{range .items[*]}{.metadata.name}{"\t"}{.status.startTime}{"\n"}{end}'
+
+# http://kubernetes.io/docs/reference/kubectl/jsonpath/
+k get svc -o jsonpath='{range .items[?(@.metadata.name=="redis-service")]}{.spec.ports[0].targetPort}{"\n"}{end}'

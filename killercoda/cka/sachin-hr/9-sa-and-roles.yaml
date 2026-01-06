@@ -1,0 +1,11 @@
+kubectl config use-context kubernetes-admin@kubernetes
+
+k create sa app-account
+
+k create role app-role-cka --verb=get --resource=po -n default
+k get role app-role-cka -o yaml
+
+k create rolebinding app-role-binding-cka --role=app-role-cka --serviceaccount=default:app-account
+k get rolebindings.rbac.authorization.k8s.io app-role-binding-cka -o yaml
+
+k auth can-i get pods --as=system:serviceaccount:default:app-account -n default

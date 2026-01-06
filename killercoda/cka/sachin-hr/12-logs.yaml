@@ -1,0 +1,20 @@
+kubectl config use-context kubernetes-admin@kubernetes
+
+k logs product
+k edit pod product 
+
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - echo $NAME' Tv Is Good' && sleep 3600
+    image: busybox
+    imagePullPolicy: Always
+    name: product-container
+    env:
+      - name: NAME
+        value: 'Sony'
+
+k replace -f /tmp/kubectl-edit-2669262531.yaml --force
+k logs product

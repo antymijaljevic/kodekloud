@@ -1,0 +1,7 @@
+kubectl config use-context kubernetes-admin@kubernetes
+
+k get sa group1-sa -o yaml
+k get clusterrole group1-role-cka -o yaml
+k get clusterrolebindings.rbac.authorization.k8s.io group1-role-binding-cka -o yaml
+
+k edit clusterrole group1-role-cka
