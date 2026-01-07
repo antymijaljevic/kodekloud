@@ -1,0 +1,44 @@
+export GITHUB_USERNAME="<your-github-username>"
+git clone --depth 1 "https://github.com/${GITHUB_USERNAME}/postgres-operator-examples.git"
+cd postgres-operator-examples
+
+kubectl apply -k kustomize/install/namespace
+kubectl apply --server-side -k kustomize/install/default
+
+k -n postgres-operator get po -w
+k get crds | grep postgres
+
+k apply -k kustomize/postgres
+k -n postgres-operator get postgresclusters
+k -n postgres-operator describe postgresclusters hippo
+
+k -n postgres-operator get secrets
+export PG_CLUSTER_PRIMARY_POD=$(kubectl get pod -n postgres-operator -o name -l postgres-operator.crunchydata.com/cluster=hippo,postgres-operator.crunchydata.com/role=master)
+kubectl -n postgres-operator port-forward "${PG_CLUSTER_PRIMARY_POD}" 5432:5432
+
+export PG_CLUSTER_USER_SECRET_NAME=hippo-pguser-rhino
+export PGPASSWORD=$(kubectl get secrets -n postgres-operator "${PG_CLUSTER_USER_SECRET_NAME}" -o go-template='{{.data.password | base64decode}}')
+export PGUSER=$(kubectl get secrets -n postgres-operator "${PG_CLUSTER_USER_SECRET_NAME}" -o go-template='{{.data.user | base64decode}}')
+export PGDATABASE=$(kubectl get secrets -n postgres-operator "${PG_CLUSTER_USER_SECRET_NAME}" -o go-template='{{.data.dbname | base64decode}}')
+psql -h localhost
+
+CREATE SCHEMA rhino AUTHORIZATION rhino;
+
+
+k -n postgres-operator get postgresclusters hippo -o yaml
+kubectl edit postgresclusters hippo -n postgres-operator
+kubectl -n postgres-operator get pods
+kubectl logs -n postgres-operator -l postgres-operator.crunchydata.com/control-plane=postgres-operator
+
+k -n postgres-operator get pods
+k -n postgres-operator get pods --show-labels | grep role
+k -n postgres-operator delete po hippo-instance1-0 
+k -n postgres-operator get pods  -w
+k -n postgres-operator describe postgresclusters hippo
+k -n postgres-operator logs -l postgres-operator.crunchydata.com/control-plane=postgres-operator
+
+psql -h localhost
+SELECT pg_is_in_recovery();
+
+kubectl exec -it -n postgres-operator <replica-pod-name> -- psql -U postgres -d postgres
+SELECT pg_last_wal_replay_lsn();
