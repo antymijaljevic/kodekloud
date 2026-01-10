@@ -1,0 +1,41 @@
+kubectl create namespace frontend
+kubectl create namespace backend
+
+kubectl run web --image=nginx --restart=Never -n frontend
+k -n frontend expose pod web --port=80
+kubectl run tester --image=busybox --restart=Never -n backend -- sleep 3600
+
+kubectl wait --for=condition=Ready pod/web -n frontend --timeout=60s
+kubectl wait --for=condition=Ready pod/tester -n backend --timeout=60s
+
+k exec -n backend tester -- wget -qO- web.frontend.svc.cluster.local
+
+kubectl label pod web app=web -n frontend
+
+k apply -f- << EOF
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-external
+  namespace: frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: web
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector: {}
+EOF
+
+k get netpol -o yaml -n frontend 
+
+kubectl exec -n backend tester -- wget -qO- --timeout=5 http://web.frontend.svc.cluster.local
+kubectl run temp --rm -i --restart=Never --image=busybox -n frontend -- wget -qO- http://web
+
+FlagPurpose-
+-rm Automatically deletes pod when done (keeps cluster clean)\
+-i Attaches stdin to see output (required for --rm)
+--restart=Never Runs once and stops (no restart loops)
+-t Terminal expirience

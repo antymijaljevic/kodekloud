@@ -1,0 +1,3 @@
+kubectl config use-context kubernetes-admin@kubernetes
+
+k run pod alpine-pod-pod --image=alpine:latest -o yaml --dry-run=client -- "sh -c" -- "tail -f /config/log.txt" > pod.yaml
