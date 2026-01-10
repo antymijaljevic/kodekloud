@@ -6,3 +6,5 @@ k get endpoints
 
 kubectl port-forward svc/web-service 8080:80
 curl http://localhost:8080
+
+Your machine:8080 → kubectl → API server → Service → Pod:80
