@@ -1,0 +1,8 @@
+kubectl get svc web-service -o yaml
+kubectl get pods --show-labels
+
+kubectl edit svc web-service
+k get endpoints
+
+kubectl port-forward svc/web-service 8080:80
+curl http://localhost:8080

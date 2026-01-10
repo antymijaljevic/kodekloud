@@ -1,0 +1,16 @@
+k create deployment webapp --replicas=3 --image=nginx:1.19 --port=80
+
+kubectl get deployments
+kubectl get pods -l app=webapp
+k exec -it webapp-5b9f6d457f-hd5nl -- nginx -v 
+
+k set image deployments/webapp nginx=nginx:1.21 --record
+
+k rollout status deployment/webapp 
+k rollout history deployment/webapp 
+
+k rollout status deployment/webapp 
+k exec -it webapp-5b9f6d457f-44qb7 -- nginx -v
+k rollout history deployment/webapp 
+
+kubectl delete deployment webapp

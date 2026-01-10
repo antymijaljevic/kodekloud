@@ -1,0 +1,20 @@
+# Create a namespace for isolation.
+k create ns rbac-demo
+
+# Create a ServiceAccount.
+k -n rbac-demo create sa limited-sa
+
+# Create a Role with limited permissions (e.g., get and list pods only).
+k -n rbac-demo create role pod-reader --resource=pods --verb=get,list
+
+# Bind the Role to the ServiceAccount.
+k -n rbac-demo create rolebinding read-pods-binding --role=pod-reader --serviceaccount rbac-demo:limited-sa
+
+# Test allowed and forbidden actions.
+k get sa,role,rolebindings.rbac.authorization.k8s.io -n rbac-demo
+
+kubectl auth can-i get pods --as=system:serviceaccount:rbac-demo:limited-sa -n rbac-demo
+kubectl auth can-i list pods --as=system:serviceaccount:rbac-demo:limited-sa -n rbac-demo
+
+kubectl auth can-i create pods --as=system:serviceaccount:rbac-demo:limited-sa -n rbac-demo
+kubectl auth can-i delete pods --as=system:serviceaccount:rbac-demo:limited-sa -n rbac-demo

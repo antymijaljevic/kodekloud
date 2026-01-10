@@ -1,0 +1,6 @@
+k get po
+k describe po broken-pod 
+k logs broken-pod 
+
+k edit po broken-pod 
+k get po
