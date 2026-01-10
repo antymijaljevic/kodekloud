@@ -1,0 +1,58 @@
+k apply -f- << EOF
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: my-pv
+spec:
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data
+EOF
+
+k get sc, pv
+
+k apply -f- << EOF
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 500Mi
+EOF
+
+k get pvc
+
+k apply -f-  << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-test-pod
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["sh", "-c", "sleep 3600"]
+    volumeMounts:
+      - mountPath: "/data"
+        name: my-storage
+  volumes:
+    - name: my-storage
+      persistentVolumeClaim:
+        claimName: my-pvc
+EOF
+
+k get po pv-test-pod -o yaml
+
+kubectl exec -it pv-test-pod -- sh -c 'echo "Hello from PV!" > /data/hello.txt'
+kubectl exec -it pv-test-pod -- cat /data/hello.txt
+
+kubectl delete pod pv-test-pod
+# recreate pod and test that data has persisted
+kubectl exec -it pv-test-pod -- cat /data/hello.txt

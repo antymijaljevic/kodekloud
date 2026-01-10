@@ -1,0 +1,12 @@
+kubectl get nodes
+k get po -A -o wide
+
+k get nodes -o jsonpath='{.spec.taints}'
+k taint node controlplane node-role.kubernetes.io/control-plane:NoSchedule-
+
+kubectl drain node01 --ignore-daemonsets
+kubectl uncordon node01
+
+# Taints test
+k get nodes controlplane -o jsonpath='{.spec.taints[1]}
+k get nodes controlplane -o jsonpath='{.spec.taints[0]}'
