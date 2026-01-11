@@ -1,0 +1,76 @@
+k create ns quota-lab
+
+k apply -f- << EOF
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-quota
+  namespace: quota-lab
+spec:
+  hard:
+    pods: "3"
+    requests.cpu: "1"
+    requests.memory: "1Gi"
+    limits.cpu: "2"
+    limits.memory: "2Gi"
+EOF
+
+k -n quota-lab get resourcequotas
+k -n quota-lab describe quota
+
+k apply -f- << EOF
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: mem-limit-range
+  namespace: quota-lab
+spec:
+  limits:
+  - default:
+      cpu: 500m
+      memory: 512Mi
+    defaultRequest:
+      cpu: 200m
+      memory: 256Mi
+    type: Container
+EOF
+
+k -n quota-lab describe limitranges
+
+k apply -f- <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-noresources
+  namespace: quota-lab
+spec:
+  containers:
+  - name: nginx
+    image: nginx
+EOF
+
+k describe pod pod-noresources -n quota-lab
+k describe pod pod-noresources -n quota-lab | grep -A 5 -i Limits
+k -n quota-lab get po pod-noresources -o jsonpath='{.metadata.annotations}' | jq
+
+k apply -f- <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-large
+  namespace: quota-lab
+spec:
+  containers:
+  - name: busybox
+    image: busybox
+    command: ["sh", "-c", "sleep 3600"]
+    resources:
+      requests:
+        cpu: "2"
+        memory: 2Gi
+      limits:
+        cpu: "3"
+        memory: 3Gi
+EOF
+
+# Error from server (Forbidden): error when creating "STDIN": pods "pod-large" is forbidden: exceeded quota: compute-quota, requested: limits.cpu=3,limits.memory=3Gi,requests.cpu=2,requests.memory=2Gi, used: limits.cpu=500m,limits.memory=512Mi,requests.cpu=200m,requests.memory=256Mi, limited: limits.cpu=2,limits.memory=2Gi,requests.cpu=1,requests.memory=1Gi
