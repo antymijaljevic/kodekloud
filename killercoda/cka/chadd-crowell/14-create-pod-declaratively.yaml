@@ -1,0 +1,3 @@
+k run pod --image=nginx -o yaml --dry-run=client > chap1-pod.yaml
+
+kubectl create -f chap1-pod.yaml

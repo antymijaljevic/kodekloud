@@ -1,0 +1,4 @@
+k create role sa-creator --resource=sa --verb=create
+k get role sa-creator -o yaml
+k create rolebinding sa-creator-binding --role=sa-creator --user=Sandra
+kubectl auth can-i create sa -n default --as Sandra

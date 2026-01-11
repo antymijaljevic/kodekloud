@@ -1,0 +1,2 @@
+k api-resources > resources.csv
+cat resources.csv

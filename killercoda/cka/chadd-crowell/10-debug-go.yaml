@@ -1,0 +1,16 @@
+k get deployments.apps/goapp-deployment 
+k get deploy,po
+
+k logs pod/goapp-deployment-68bd7bb8f5-zg26c
+
+env:
+- name: PORT
+  value: "8080"
+
+k edit deployments.apps goapp-deployment
+k rollout restart deployment/goapp-deployment 
+k logs pod/goapp-deployment-688c897c76-wvlg4 
+
+k get svc goapp-service -o yaml
+k get svc goapp-service -o jsonpath='{.spec.clusterIP}'
+curl http://10.99.211.37:8080

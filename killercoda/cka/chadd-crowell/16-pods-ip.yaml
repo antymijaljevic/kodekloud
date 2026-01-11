@@ -1,0 +1,2 @@
+k -n kube-system get po -o wide pod-ip-output.txt
+kubectl get pod kube-apiserver-controlplane -n kube-system -o yaml | grep hostNetwork

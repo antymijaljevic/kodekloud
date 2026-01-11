@@ -1,0 +1,9 @@
+k create clusterrole acme-corp-clusterrole --verb=create --resource=deploy,rs,ds
+k get clusterrole acme-corp-clusterrole -o yaml 
+
+k create clusterrolebinding acme-corp-clusterrole --clusterrole=acme-corp-clusterrole --serviceaccount=default:secure-sa
+k get clusterrolebindings.rbac.authorization.k8s.io acme-corp-clusterrole -o yaml
+
+
+k auth can-i create ds -n default --as=system:serviceaccount:default:secure-sa
+k auth can-i delete ds -n default --as=system:serviceaccount:default:secure-sa

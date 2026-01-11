@@ -1,0 +1,2 @@
+cat /etc/kubernetes/kubelet.conf > kubelet-config.txt
+openssl x509 -in /var/lib/kubelet/pki/kubelet-client-current.pem -text -noout

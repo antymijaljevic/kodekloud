@@ -1,0 +1,2 @@
+sudo systemctl status kubelet > /tmp/kubelet-status.txt 
+cat /tmp/kubelet-status.txt
