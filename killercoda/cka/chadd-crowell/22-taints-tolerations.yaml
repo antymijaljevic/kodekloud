@@ -1,0 +1,30 @@
+k get nodes node01 -o yaml -o jsonpath='{.spec.taints}' | jq
+
+# [
+#   {
+#     "effect": "NoSchedule",
+#     "key": "dedicated",
+#     "value": "special-user"
+#   }
+# ]
+
+cat << EOF > pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: nginx
+  name: nginx
+spec:
+  containers:
+  - image: nginx
+    name: nginx
+  tolerations:
+  - key: "dedicated"
+    value: "special-user"
+    effect: "NoSchedule"
+EOF
+
+k create -f pod.yaml 
+
+k get po -o wide

@@ -1,0 +1,30 @@
+# create sa without token
+kubectl -n default create sa secure-sa --dry-run=client -o yaml > sa.yaml
+echo "automountServiceAccountToken: false" >> sa.yaml
+k create -f sa.yaml
+
+# create pod with mentioned sa
+kubectl -n default get sa secure-sa -o yaml
+k run test-pod --image=nginx -o yaml --dry-run=client > pod.yaml
+
+cat << EOF > pod.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: test-pod
+  name: test-pod
+spec:
+  containers:
+  - image: nginx
+    name: test-pod
+    resources: {}
+  serviceAccountName: secure-sa
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+EOF
+
+# make sure that token isn't available
+k create -f pod.yaml
+k exec -it test-pod -- cat /var/run/secrets/kubernetes.io/serviceaccount/token
