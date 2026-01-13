@@ -1,0 +1,23 @@
+k -n 012963bd run ctrl-pod --image=nginx -o yaml --dry-run=client > pod.yaml
+
+# the scheduler does not check taints.
+k apply -f - << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: ctrl-pod
+  name: ctrl-pod
+  namespace: 012963bd
+spec:
+  containers:
+  - image: nginx
+    name: ctrl-pod
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+  nodeName: controlplane
+status: {}
+EOF
+
+k -n 012963bd get po -o wide

@@ -1,0 +1,40 @@
+k -n 012963bd run az1-pod --image=nginx:1.24.0 -o yaml --dry-run=client > pod.yaml
+k get nodes --show-labels
+k taint node controlplane node-role.kubernetes.io/control-plane-
+
+k apply -f- << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: az1-pod
+  name: az1-pod
+  namespace: 012963bd
+spec:
+  containers:
+  - image: nginx:1.24.0
+    name: az1-pod
+    resources: {}
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 80
+        preference:
+          matchExpressions:
+          - key: availability-zone
+            operator: In
+            values:
+            - zone1
+      - weight: 20
+        preference:
+          matchExpressions:
+          - key: availability-zone
+            operator: In
+            values:
+            - zone2
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+EOF
+
+k get po -n 012963bd -o wide
