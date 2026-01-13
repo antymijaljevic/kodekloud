@@ -1,0 +1,48 @@
+# Create test role
+k create ns web
+k -n web create role pod-reader --resource=po --verb=get,list
+k -n web create rolebinding pod-reader-binding --role=pod-reader --user=carlton
+
+k get role,rolebinding -n web
+k -n web run pod1 --image=nginx
+
+# create private key for user
+openssl genrsa -out carlton.key 2048
+
+# Certificate Signing Request (CSR) for the Kubernetes API using our private key and insert the common name 
+# and output that to a file named carlton.csr with the following command
+openssl req -new -key carlton.key -subj "/CN=carlton" -out carlton.csr
+
+# CertificateSigningRequest Form
+export REQUEST=$(cat carlton.csr | base64 -w 0)
+
+kubectl apply -f - << EOF
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: carlton
+spec:
+  groups:
+  - system:authenticated
+  request: $REQUEST
+  signerName: kubernetes.io/kube-apiserver-client
+  usages:
+  - client auth
+EOF
+
+
+# Appprove request
+k get csr carlton
+k certificate approve carlton
+
+# Get client certificate (Public key, Identity, Signature)
+k get csr carlton -o jsonpath='{.status.certificate}' | base64 -d > carlton.crt
+
+# set cred in kubeconfig
+k config set-credentials carlton --client-key=carlton.key --client-certificate=carlton.crt --embed-cert
+k config view
+
+# Use user
+k config set-context carlton --user=carlton --cluster=kubernetes
+k config use-context carlton
+k -n web get po
