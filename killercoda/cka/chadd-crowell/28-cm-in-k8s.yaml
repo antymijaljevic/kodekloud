@@ -1,0 +1,50 @@
+k apply -f- << EOF
+apiVersion: v1
+data:
+  redis.conf: |
+    maxmemory 2mb
+    maxmemory-policy allkeys-lru
+kind: ConfigMap
+metadata:
+  name: redis-config
+EOF
+
+k describe cm redis-config
+
+k run redis-pod --image=redis:7 --port=6379 --command 'redis-server' '/redis-master/redis.conf' --dry-run=client -o yaml > redis.yaml
+
+k apply -f- <<EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: redis-pod
+  name: redis-pod
+spec:
+  containers:
+  - command:
+    - redis-server
+    - /redis-master/redis.conf
+    image: redis:7
+    name: redis-pod
+    ports:
+    - containerPort: 6379
+    volumeMounts:
+      - name: config-volume
+        mountPath: /redis-master
+  volumes:
+    - name: config-volume
+      configMap:
+        name: redis-config
+  resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+EOF
+
+k get pod
+k exec redis-pod -- cat /redis-master/redis.conf
+k exec -it redis-pod -- sh
+
+redis-cli CONFIG GET maxmemory
+redis-cli CONFIG GET maxmemory-policy

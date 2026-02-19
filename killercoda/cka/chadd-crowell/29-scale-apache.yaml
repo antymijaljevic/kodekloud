@@ -1,0 +1,19 @@
+k create deploy apache --image=httpd:2.4.54 --replicas=3
+k get deployments/apache
+
+
+k scale deployment/apache --replicas=5
+k get deployments/apache
+
+k set image deploy/apache httpd=httpd:alpine
+k rollout history deployment/apache
+
+k rollout history deployment/apache --revision=1
+k rollout history deployment/apache --revision=2
+
+k describe deployments.apps apache | grep -i Annotations
+kubectl rollout history deployment/apache # <-- higest number is latest
+
+k rollout undo deployment/apache --to-revision=1
+
+# 2
